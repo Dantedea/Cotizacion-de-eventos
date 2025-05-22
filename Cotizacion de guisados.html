@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cotizador de Paquetes para Eventos</title>
+  <style>
+    /* Estilos generales del cuerpo de la página */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    /* Estilos del encabezado */
+    header {
+      background-color: #e74c3c; /* Color rojo */
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    /* Estilos del contenedor de paquetes */
+    .paquetes {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px; /* Espacio entre paquetes */
+      margin: 20px;
+    }
+    /* Estilos de cada paquete individual */
+    .paquete {
+      background-color: white;
+      padding: 20px;
+      width: 80%; /* Ancho del paquete */
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+    /* Estilos del título del paquete */
+    .paquete h3 {
+      margin-top: 0;
+      color: #e74c3c; /* Color rojo */
+    }
+    /* Estilos de las listas dentro de los paquetes */
+    .paquete ul {
+      padding-left: 20px;
+    }
+    /* Estilos de los botones */
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #27ae60; /* Color verde */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    /* Estilos del modal (ventana emergente) */
+    .modal {
+      display: none; /* Oculto por defecto */
+      position: fixed; /* Fijo en la pantalla */
+      top: 0;
+      left: 0;
+      width: 100vw; /* Ancho completo de la ventana */
+      height: 100vh; /* Alto completo de la ventana */
+      background: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
+      justify-content: center;
+      align-items: center;
+    }
+    /* Estilos del contenido del modal */
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px; /* Ancho máximo */
+      overflow-y: auto; /* Scroll vertical si el contenido es largo */
+      max-height: 90vh; /* Altura máxima */
+    }
+    /* Estilos del botón de cerrar modal */
+    .close {
+      float: right;
+      cursor: pointer;
+      font-size: 20px;
+    }
+    /* Estilos del mensaje de éxito */
+    .success {
+      color: green;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Cotizador de Paquetes para Eventos</h1>
+  </header>
+  <section class="paquetes">
+    <div class="paquete">
+      <h3>🎉 Paquete para 30 Personas - $3,450</h3>
+      <ul>
+        <li>4 guisados de tu preferencia</li>
+        <li>Arroz</li>
+        <li>Salsas caseras, limones y tortillas</li>
+        <li>Desechables y servilletas</li>
+        <li>2 horas de servicio</li>
+      </ul>
+      <button onclick="abrirCotizador(30, 3450, 4, 115, 30, 49)">Cotizar</button>
+    </div>
+    <div class="paquete">
+      <h3>🎉 Paquete para 50 Personas - $5,500</h3>
+      <ul>
+        <li>5 guisados de tu preferencia</li>
+        <li>Arroz</li>
+        <li>Salsas caseras, limones y tortillas</li>
+        <li>Desechables y servilletas</li>
+        <li>2 horas de servicio</li>
+      </ul>
+      <button onclick="abrirCotizador(50, 5500, 5, 110, 50, 99)">Cotizar</button>
+    </div>
+    <div class="paquete">
+      <h3>🎉 Paquete para 100 Personas - $10,500</h3>
+      <ul>
+        <li>6 guisados de tu preferencia</li>
+        <li>Arroz</li>
+        <li>Salsas caseras, limones y tortillas</li>
+        <li>Desechables y servilletas</li>
+        <li>2 horas de servicio</li>
+        <li>2 aguas de 20 litros</li>
+      </ul>
+      <button onclick="abrirCotizador(100, 10500, 6, 105, 100, 150)">Cotizar</button>
+    </div>
+  </section>
+  <div class="modal" id="modal">
+    <div class="modal-content" id="modal-content">
+      <span class="close" onclick="cerrarModal()">&times;</span>
+      <div id="formulario"></div>
+    </div>
+  </div>
+  <script>
+    // Lista de guisados disponibles
+    const guisados = [
+      "🐷 Pipián Rojo de Cerdo", "🌶Mole Poblano", "🐷 Chicharrón a la mexicana",
+      "🥔 Papas con Rajas", "🍗 Pollo en Salsa de Habanero", "🌭 Salchichas en Crema de Chipotle",
+      "🥚 Huevo Duro", "🍗 Milanesa de Pollo", "🥓 Rollos de Jamón", "🍗 Pipián verde de pollo",
+      "🐷 Chicharrón en salsa verde", "🥔 Papas con longaniza", "🔥 Cochinita pibil",
+      "🫑 Rajas poblanas a la mexicana", "🍗 Pipián rojo de pollo", "🐷 Chicharrón prensado",
+      "🌶 Chile verde de puerco", "🌭 Salchichas a la mexicana", "🌽 Rajas poblanas con elote",
+      "🌶 Tinga de pollo", "🥩 Carne molida con nopales en pasilla", "🌱 Soya al Pastor",
+      "🐷 Pipián verde de Cerdo", "🌶 Chiles rellenos", "🍗 Pollo en crema de champiñón",
+      "🔥 Longaniza con nopales", "🥩 Bistec con papas", "🥄 Picadillo", "👅 Lengua en salsa verde",
+      "🥣 Albóndigas en salsa verde", "🍗 Pollo en crema de chipotle", "🔥 Longaniza en salsa roja",
+      "🥔 Papas a la mexicana", "🐷 Patitas de Puercos Capeadas", "🔥 Hígado encebollado",
+      "🐷 Alambre de cerdo", "🐷 Chuleta al pastor y en crema de chipotle"
+    ];
+
+    // Lista de aguas naturales disponibles
+    const aguasNaturales = [
+      "🍹 Tamarindo", "🌺 Jamaica", "🥭 Maracuyá", "🍋 Limón con Chía",
+      "🍈 Guanábana", "🥭 Mango"
+    ];
+
+    /**
+     * Abre el modal de cotización y genera el formulario dinámicamente.
+     * @param {number} basePersonas - Número base de personas para el paquete.
+     * @param {number} baseCosto - Costo base del paquete.
+     * @param {number} maxGuisados - Número máximo de guisados a seleccionar.
+     * @param {number} costoExtra - Costo por persona extra.
+     * @param {number} minPersonas - Mínimo de personas permitidas.
+     * @param {number} maxPersonas - Máximo de personas permitidas.
+     */
+    function abrirCotizador(basePersonas, baseCosto, maxGuisados, costoExtra, minPersonas, maxPersonas) {
+      let html = `
+        <h2>Arma tu Cotización</h2>
+        <ul>
+          <li><label>Nombre: <input type="text" id="nombre" required></label></li>
+          <li><label>Apellidos: <input type="text" id="apellidos" required></label></li>
+          <li><label>Correo: <input type="email" id="correo" required></label></li>
+          <li><label>Número móvil: <input type="tel" id="movil" required></label></li>
+          <li><label>Día del evento: <input type="date" id="fecha" required></label></li>
+          <li><label>Horario del evento: <input type="time" id="hora" required></label></li>
+          <li><label>Dirección: <input type="text" id="direccion" required></label></li>
+          <li><label>Ubicación (URL opcional): <input type="url" id="ubicacion"></label></li>
+        </ul>
+        <p><strong>Selecciona hasta ${maxGuisados} guisados:</strong></p>
+        <div id="listaGuisados">`;
+      // Genera las opciones de guisados
+      guisados.forEach((g, i) => {
+        html += `<label><input type="checkbox" class="guisado" value="${g}" onchange="limitarSeleccion(${maxGuisados})"> ${g}</label><br>`;
+      });
+      html += `</div>
+        <p><strong>Selecciona aguas naturales ($450 c/u):</strong></p>
+        <div id="listaAguas">`;
+      // Genera las opciones de aguas naturales
+      aguasNaturales.forEach((agua) => {
+        html += `<label><input type="checkbox" class="agua" value="${agua}" onchange="calcularTotal(${baseCosto}, ${basePersonas}, ${costoExtra})"> ${agua}</label><br>`;
+      });
+      html += `</div>
+        <p><strong>Selecciona la cantidad de personas (mín ${minPersonas}, máx ${maxPersonas}):</strong></p>
+        <input type="number" id="personas" value="${basePersonas}" min="${minPersonas}" max="${maxPersonas}" onchange="calcularTotal(${baseCosto}, ${basePersonas}, ${costoExtra})">
+        <p>Total: $<span id="total">${baseCosto}</span></p>
+        <button onclick="enviarCotizacion()">Enviar Cotización</button>
+        <p class="success" id="mensajeExito"></p>
+      `;
+      // Inserta el HTML generado en el formulario y muestra el modal
+      document.getElementById('formulario').innerHTML = html;
+      document.getElementById('modal').style.display = 'flex';
+    }
+
+    /**
+     * Limita la selección de checkboxes de guisados al número máximo permitido.
+     * @param {number} max - Número máximo de guisados que se pueden seleccionar.
+     */
+    function limitarSeleccion(max) {
+      const seleccionados = document.querySelectorAll('.guisado:checked');
+      const checkboxes = document.querySelectorAll('.guisado');
+      // Habilita todos los checkboxes primero
+      checkboxes.forEach(cb => cb.disabled = false);
+      // Si se ha alcanzado el límite, deshabilita los checkboxes no seleccionados
+      if (seleccionados.length >= max) {
+        checkboxes.forEach(cb => {
+          if (!cb.checked) cb.disabled = true;
+        });
+      }
+    }
+
+    /**
+     * Calcula el costo total de la cotización.
+     * @param {number} baseCosto - Costo base del paquete.
+     * @param {number} basePersonas - Número base de personas para el paquete.
+     * @param {number} costoExtra - Costo por persona extra.
+     */
+    function calcularTotal(baseCosto, basePersonas, costoExtra) {
+      const cantidad = parseInt(document.getElementById('personas').value);
+      const extras = cantidad - basePersonas;
+      let total = baseCosto + (extras > 0 ? extras * costoExtra : 0); // Calcula el costo por personas extra
+      const aguasSeleccionadas = document.querySelectorAll('.agua:checked').length;
+      total += aguasSeleccionadas * 450; // Añade el costo de las aguas seleccionadas
+      document.getElementById('total').textContent = total; // Actualiza el total en la interfaz
+    }
+
+    /**
+     * Envía la cotización (actualmente solo valida campos y muestra un mensaje de éxito).
+     */
+    function enviarCotizacion() {
+      const campos = ['nombre', 'apellidos', 'correo', 'movil', 'fecha', 'hora', 'direccion'];
+      // Valida que todos los campos requeridos estén llenos
+      for (const id of campos) {
+        if (!document.getElementById(id).value) {
+          // Reemplazado alert() con un mensaje en el modal para evitar problemas en iframes
+          const modalContent = document.getElementById('modal-content');
+          let errorMessage = document.getElementById('errorMessage');
+          if (!errorMessage) {
+            errorMessage = document.createElement('p');
+            errorMessage.id = 'errorMessage';
+            errorMessage.style.color = 'red';
+            modalContent.insertBefore(errorMessage, modalContent.firstChild);
+          }
+          errorMessage.textContent = 'Por favor completa todos los campos.';
+          return;
+        }
+      }
+      // Si todos los campos están llenos, muestra el mensaje de éxito y limpia cualquier mensaje de error
+      document.getElementById('mensajeExito').textContent = '🎉 ¡Cotización enviada correctamente!';
+      const errorMessage = document.getElementById('errorMessage');
+      if (errorMessage) {
+        errorMessage.textContent = ''; // Limpia el mensaje de error si existe
+      }
+    }
+
+    /**
+     * Cierra el modal de cotización.
+     */
+    function cerrarModal() {
+      document.getElementById('modal').style.display = 'none';
+      // Limpia el mensaje de éxito y cualquier mensaje de error al cerrar el modal
+      document.getElementById('mensajeExito').textContent = '';
+      const errorMessage = document.getElementById('errorMessage');
+      if (errorMessage) {
+        errorMessage.textContent = '';
+      }
+    }
+  </script>
+</body>
+</html>
